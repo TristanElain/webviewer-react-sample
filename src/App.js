@@ -1,22 +1,33 @@
-import React, { useRef, useEffect } from 'react';
-import WebViewer from '@pdftron/webviewer';
-import './App.css';
+import React, { useRef, useEffect, useState } from "react";
+import WebViewer from "@pdftron/webviewer";
+import "./App.css";
+
+const doc1 = "/files/PDFTRON_about.pdf";
+const doc2 = "/files/PDF-4.pdf";
 
 const App = () => {
   const viewer = useRef(null);
+  const [docToLoad, setDocToLoad] = useState(doc1);
+  const [instance, setInstance] = useState();
 
-  // if using a class, equivalent of componentDidMount 
+  const handleLoadDoc = () => {
+    setDocToLoad((actual) => (actual === doc1 ? doc2 : doc1));
+  };
+
+  // if using a class, equivalent of componentDidMount
   useEffect(() => {
     WebViewer(
       {
-        path: '/webviewer/lib',
-        initialDoc: '/files/PDFTRON_about.pdf',
+        path: "/webviewer/lib",
+        initialDoc: doc1,
       },
-      viewer.current,
+      viewer.current
     ).then((instance) => {
       const { documentViewer, annotationManager, Annotations } = instance.Core;
 
-      documentViewer.addEventListener('documentLoaded', () => {
+      setInstance(instance);
+
+      documentViewer.addEventListener("documentLoaded", () => {
         const rectangleAnnot = new Annotations.RectangleAnnotation({
           PageNumber: 1,
           // values are in page coordinates with (0, 0) in the top left
@@ -24,7 +35,7 @@ const App = () => {
           Y: 150,
           Width: 200,
           Height: 50,
-          Author: annotationManager.getCurrentUser()
+          Author: annotationManager.getCurrentUser(),
         });
 
         annotationManager.addAnnotation(rectangleAnnot);
@@ -34,9 +45,18 @@ const App = () => {
     });
   }, []);
 
+  useEffect(() => {
+    if (!instance) {
+      return;
+    }
+    instance.UI.loadDocument(docToLoad);
+  }, [docToLoad]);
   return (
     <div className="App">
-      <div className="header">React sample</div>
+      <div className="header">
+        React sample
+        <button onClick={() => handleLoadDoc()}>Load another doc</button>
+      </div>
       <div className="webviewer" ref={viewer}></div>
     </div>
   );

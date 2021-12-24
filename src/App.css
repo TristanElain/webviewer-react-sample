@@ -14,4 +14,6 @@
   font-size: 1.2em;
   line-height: 44px;
   color: white;
+  display: flex;
+  justify-content: space-between;
 }
